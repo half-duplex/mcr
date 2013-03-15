@@ -1,17 +1,6 @@
 import os
 import configparser
 
-def printhelp(section=""):
-    print("Minecraft Runner (mcr) python edition")
-    print("By Trevor Bergeron, mallegonian@gmail.com")
-    sections={}
-    sections["usage"]="Usage: TBD"
-    sections["help"]="Tehehe, smartass."
-    if not section in sections:
-        section="usage"
-    print(sections[section])
-
-
 class Server(object):
     """ A minecraft server """
     name=""
@@ -43,15 +32,19 @@ class Server(object):
             print("No server section found for \"",name,"\".",sep="")
             return
         return allconfigs[name]
-        
+
+
+
+
+
+
+
+
 def getservers(user=""):
     servers={}
     for svname in os.listdir(os.path.expanduser("~"+user)+"/.config/mcr/"):
         servers[svname]=Server(svname,user)
     return servers
-
-print(*argv)
-
 
 
 

@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from libmcr import *
 
 def printhelp(section=""):
     print("Minecraft Runner (mcr) python edition")
@@ -10,7 +11,7 @@ def printhelp(section=""):
         section="usage"
     print(sections[section])
 
-
+dir(getservers())
 
 
 
