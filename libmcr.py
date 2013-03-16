@@ -23,7 +23,7 @@ logger = logging.getLogger("libmcr")
 class Server(object):
     """ A minecraft server """
 
-    def __init__(self,name=None,user=None,configfile=None):#,loglevel=logging.WARNING):
+    def __init__(self,name=None,user=None,configfile=None):
         name = name if name else "default"
         user = user if user else ""
         if configfile: # specified: check existence
@@ -55,7 +55,8 @@ class Server(object):
         self.tmuxname = config["tmuxname"] if "tmuxname" in config and config["tmuxname"] else "mc"
 
     def attach(self):
-        os.execlp("tmux","tmux","a","-t",self.tmuxname) # argv[0] = called name
+        # argv[0] is called binary name
+        return(os.execlp("tmux","tmux","a","-t",self.tmuxname))
 
     def backup(self,remote=False):
         print("Not implemented")
@@ -73,9 +74,9 @@ class Server(object):
         print("Not implemented")
 
     def status(self):
-        ret=subprocess.call(["tmux","has-session","-t",self.tmuxname],
+        ret = subprocess.call(["tmux","has-session","-t",self.tmuxname],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w'))
-        if ret==0: print("running")
+        if ret == 0: print("running")
         else: print("stopped")
         return(ret)
 
@@ -88,8 +89,8 @@ class Server(object):
 
 def getservers(user=""):
     """ Create a dictionary of all servers for a(=this) user """
-    servers={}
+    servers = {}
     for svname in os.listdir(os.path.expanduser("~"+user)+"/.config/mcr/"):
-        servers[svname]=Server(svname,user)
+        servers[svname] = Server(svname,user)
     return servers
 
