@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-
-# mcr.py
-# This file is part of the MCR project
-# Copyright 2013 Trevor Bergeron, et al., all rights reserved
+#!/usr/bin/python3 -tt
+"""
+mcr.py
+This file is part of the MCR project
+Copyright 2013 Trevor Bergeron & Sean Buckley, all rights reserved
+"""
 
 import argparse
 import logging
@@ -29,21 +30,24 @@ Copyright 2013 Trevor Bergeron & Sean Buckley, all rights reserved
 Please report bugs to mallegonian@gmail.com''')
 parser.add_argument("command",help="what to do (see below)")
 verbosity_args=parser.add_mutually_exclusive_group()
-verbosity_args.add_argument("-v","--verbose",help="increase output verbosity, stacks to 2",
-            action="count",default=0,dest="verbose")
+verbosity_args.add_argument("-v", "--verbose",
+    help="increase output verbosity, stacks to 2",
+    action="count", default=0, dest="verbose")
 verbosity_args.add_argument("-q","--quiet",help="restrict output, stacks to 2",
-            action="count",default=0,dest="quiet")
+    action="count",default=0,dest="quiet")
 parser.add_argument("data",help="any other info for the command, esp. _send_",
-            nargs=argparse.REMAINDER,default="")
+    nargs=argparse.REMAINDER,default="")
 parser.add_argument("-V","--version",action="version",
-            version="%(prog)s 0.1-dev, libmcr "+libmcr_version)
+    version="%(prog)s 0.1-dev, libmcr "+libmcr_version)
 parser.add_argument("-i","--instance",help="specify a server instance",
-            metavar="servername",dest="configname",default="")
+    metavar="servername",dest="configname",default="")
 cfgsource_args=parser.add_mutually_exclusive_group()
-cfgsource_args.add_argument("-c","--config",help="specify an alternate config file",
-            metavar="filename",dest="configfile",default="")
-cfgsource_args.add_argument("-u","--user",help="specify an alternate user's config file",
-            metavar="username",dest="configuser",default="")
+cfgsource_args.add_argument("-c","--config",
+    help="specify an alternate config file",
+    metavar="filename",dest="configfile",default="")
+cfgsource_args.add_argument("-u","--user",
+    help="specify an alternate user's config file",
+    metavar="username",dest="configuser",default="")
 args=parser.parse_args()
 if args.quiet>=2:
     loglevel=logging.CRITICAL
@@ -63,13 +67,20 @@ if args.command=="mkconfig":
     with open(os.path.expanduser("~"+args.configuser)+"/.config/mcr","a") as cfgr:
         cfgr.write('''
 ;; Sample config
-;[default] ; server instance name
-;dir=/home/minecraft/minecraft ; the directory to run the server from (and to back up)
-;tmuxname=mc ; the name of the tmux session
-;jar=craftbukkit.jar -log-strip-color true ; the jar and arguments to run
-;backupdir=/home/minecraft/minecraft-backups/ ; where to back up to for local. will create backupdir/20130223030000/
-;backupremotemethod=rsync-ssh ; supported: scp, rsync-ssh
-;backupremotetype=update ; update: one up-to-date backup. collect: old backups plus this one.
+;; server instance name
+;[default]
+;; the directory to run the server from (and to back up)
+;dir=/home/minecraft/minecraft
+;; the name of the tmux session
+;tmuxname=mc
+;; the jar and arguments to run
+;jar=craftbukkit.jar -log-strip-color true
+;; where to back up to for local. will create backupdir/20130223030000/
+;backupdir=/home/minecraft/minecraft-backups/
+;; supported: scp, rsync-ssh
+;backupremotemethod=rsync-ssh
+;; update: one up-to-date backup. collect: old backups plus this one.
+;backupremotetype=update
 ;backupremoteaddress=minecraft@other-host.de:/home/minecraft/minecraft-backups/
 ''')
         print("A sample config file has been appended to")
@@ -78,10 +89,26 @@ if args.command=="mkconfig":
 
 server=Server(args.configname,args.configuser,args.configfile)
 
-if args.command=="a": args.command="attach"
-if args.command in ["attach","backup","kill","restart","send","start","status","stop","update"]:
-    logging.debug("Passing to Server.%s()"%(args.command))
-    exit(getattr(server,args.command)())
+#if args.command=="a": args.command="attach"
+#if args.command in ["attach","backup","kill","restart","send","start","status","stop","update"]:
+#    logging.debug("passing to Server.%s()"%(args.command))
+#    exit(getattr(server,args.command)())
+if args.command=="attach" or args.command=="a":
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    ret=server.attach()
+    if ret:
+        logging.warning("error, is the server running?")
+    exit(ret)
+if args.command=="backup":
+    if "remote" in args.data:
+        ret=server.backup(remote=True)
+    else:
+        ret=server.backup()
+    if ret:
+        logging.warning("error, is the server running?")
+    exit(ret)
+        
 
 print("Unrecognized command \"",args.command,"\"",sep="")
 parser.print_help()
