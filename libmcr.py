@@ -1,9 +1,11 @@
 # libmcr.py
 # This file is part of the MCR project
-# Copyright 2013 Trevor Bergeron, all rights reserved
+# Copyright 2013 Trevor Bergeron, et al., all rights reserved
 
 import os
 import configparser
+
+libmcr_version="0.1-dev"
 
 class Server(object):
     """ A minecraft server """
@@ -41,6 +43,9 @@ class Server(object):
         print("Not implemented")
 
     def start():
+        print("Not implemented")
+
+    def status():
         print("Not implemented")
 
     def send():
