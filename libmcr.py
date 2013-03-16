@@ -74,6 +74,9 @@ class Server(object):
     def stop(self):
         print("Not implemented")
 
+    def update(self):
+        print("Not implemented")
+
 
 def getservers(user=""):
     """ Create a dictionary of all servers for a(=this) user """
