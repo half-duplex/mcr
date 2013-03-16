@@ -2,24 +2,34 @@
 # This file is part of the MCR project
 # Copyright 2013 Trevor Bergeron, et al., all rights reserved
 
-import os
 import configparser
+import logging
+import os
 
 libmcr_version="0.1-dev"
+
+logger = logging.getLogger("libmcr")
+# At the moment these cause double logging
+#ch = logging.StreamHandler()
+#formatter = logging.Formatter('%(asctime)s %(name)s [%(levelname)s] %(message)s')
+#ch.setFormatter(formatter)
+#logger.addHandler(ch)
+
 
 class Server(object):
     """ A minecraft server """
 
-    def __init__(self,name="",user=""):
+    def __init__(self,name=None,user=None,configfile=None):#,loglevel=logging.WARNING):
+        name = name if name else "default"
+        user = user if user else ""
+        if configfile: # specified: check existence
+            if not os.path.exists(configfile):
+                configfile = os.getcwd()+configfile
+                if not os.path.exists(configfile):
+                    print("Could not find config file!")
+        else: configfile=os.path.expanduser("~"+user)+"/.config/mcr"
         self.name=name
         self.user=user
-        self.config=self.__loadconfig(name,user)
-
-    def __loadconfig(self,name="",user=""):
-        """
-        name: server name
-        user: username for cfg (and running)
-        """
         class MyConfigParser(configparser.ConfigParser):
             def as_dict(self):
                 d = dict(self._sections)
@@ -28,31 +38,42 @@ class Server(object):
                     d[k].pop('__name__', None)
                 return d
         mycfgp=MyConfigParser()
-        name = name if name else "default"
-        mycfgp.read(os.path.expanduser("~"+user)+"/.config/mcr/"+name)
+        mycfgp.read(configfile)
         allconfigs=mycfgp.as_dict()
         if len(allconfigs)<1:
-            print("No or empty config file for this server. See \"mcr help config\".")
+            print("No or empty config file. See \"mcr mkconfig\" or documentation.")
             return
         if not name in allconfigs:
             print("No server section found for \"",name,"\".",sep="")
             return
-        return allconfigs[name]
+        config=allconfigs[name]
+        logger.info("loaded cfg:"+str(config))
+        self.tmuxname = config["tmuxname"] if "tmuxname" in config and config["tmuxname"] else "mc"
 
-    def stop():
+    def attach(self):
+        os.execlp("tmux","tmux","a","-t",self.tmuxname) # argv[0] = called name
+
+    def backup(self):
         print("Not implemented")
 
-    def start():
+    def kill(self):
         print("Not implemented")
 
-    def status():
+    def restart(self):
         print("Not implemented")
 
-    def send():
+    def send(self):
         print("Not implemented")
 
-    def backup():
+    def start(self):
         print("Not implemented")
+
+    def status(self):
+        print("Not implemented")
+
+    def stop(self):
+        print("Not implemented")
+
 
 def getservers(user=""):
     """ Create a dictionary of all servers for a(=this) user """
