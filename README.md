@@ -1,4 +1,4 @@
-mcr
+Minecraft Runner (MCR)
 ===
 
-Minecraft Runner
+Minecraft server management made easy (well, automated anyway)
