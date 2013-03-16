@@ -5,6 +5,8 @@
 import configparser
 import logging
 import os
+import subprocess
+import sys
 
 libmcr_version="0.1-dev"
 
@@ -69,7 +71,10 @@ class Server(object):
         print("Not implemented")
 
     def status(self):
-        print("Not implemented")
+        ret=subprocess.call(["tmux","has-session","-t",self.tmuxname], stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w'))
+        if ret==0: print("running")
+        else: print("stopped")
+        return(ret)
 
     def stop(self):
         print("Not implemented")
