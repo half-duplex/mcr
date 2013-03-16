@@ -1,13 +1,17 @@
+# libmcr.py
+# This file is part of the MCR project
+# Copyright 2013 Trevor Bergeron, all rights reserved
+
 import os
 import configparser
 
 class Server(object):
     """ A minecraft server """
-    name=""
-    user=""
+
     def __init__(self,name="",user=""):
+        self.name=name
+        self.user=user
         self.config=self.__loadconfig(name,user)
-        print("Creating server object, config: ",self.config,"\n",sep="",end="")
 
     def __loadconfig(self,name="",user=""):
         """
@@ -33,20 +37,22 @@ class Server(object):
             return
         return allconfigs[name]
 
+    def stop():
+        print("Not implemented")
 
+    def start():
+        print("Not implemented")
 
+    def send():
+        print("Not implemented")
 
-
-
-
+    def backup():
+        print("Not implemented")
 
 def getservers(user=""):
+    """ Create a dictionary of all servers for a(=this) user """
     servers={}
     for svname in os.listdir(os.path.expanduser("~"+user)+"/.config/mcr/"):
         servers[svname]=Server(svname,user)
     return servers
-
-
-
-
 
