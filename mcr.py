@@ -99,13 +99,23 @@ if args.command == "attach" or args.command == "a":
     if ret:
         logging.warning("error, is the server running?")
     exit(ret)
-if args.command == "backup":
+elif args.command == "backup":
     if "remote" in args.data:
         ret = server.backup(remote=True)
     else:
         ret = server.backup()
     if ret:
-        logging.warning("error, is the server running?")
+        logging.error("error")
+    exit(ret)
+
+elif args.command == "status":
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    ret = server.status()
+    if ret:
+        print("stopped")
+    else:
+        print("running")
     exit(ret)
         
 

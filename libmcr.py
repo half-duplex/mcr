@@ -57,7 +57,10 @@ class Server(object):
             in config and config["tmuxname"] else "mc"
 
     def attach(self):
-        # argv[0] is called binary name
+        # argv[0] is called binary name. Need os.execlp so tmux _replaces_ py.
+        if self.status():
+            logger.error("server not running, can't attach")
+            return
         return(os.execlp("tmux","tmux","a","-t",self.tmuxname))
 
     def backup(self,remote=False):
@@ -75,12 +78,9 @@ class Server(object):
     def start(self):
         print("Not implemented")
 
-    def status(self):
-        ret = subprocess.call(["tmux","has-session","-t",self.tmuxname],
-            stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w'))
-        if ret == 0: print("running")
-        else: print("stopped")
-        return(ret)
+    def status(self): # 0=running, 1=stopped
+        return(subprocess.call(["tmux","has-session","-t",self.tmuxname],
+            stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
     def stop(self):
         print("Not implemented")
