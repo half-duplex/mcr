@@ -9,6 +9,7 @@ import logging
 import os
 import subprocess
 import sys
+import time
 
 libmcr_version = "0.1-dev"
 
@@ -57,10 +58,10 @@ class Server(object):
             in config and config["tmuxname"] else "mc"
 
     def attach(self):
-        # argv[0] is called binary name. Need os.execlp so tmux _replaces_ py.
         if self.status():
             logger.error("server not running, can't attach")
             return
+        # argv[0] is called binary name. Need os.execlp so tmux _replaces_ py.
         return(os.execlp("tmux","tmux","a","-t",self.tmuxname))
 
     def backup(self,remote=False):
@@ -70,7 +71,12 @@ class Server(object):
         print("Not implemented")
 
     def restart(self):
-        print("Not implemented")
+        if self.status() == 0:
+            self.stop()
+        else:
+            logger.warning("server wasn't running, starting anyway")
+        self.start()
+        return(self.status())
 
     def send(self):
         print("Not implemented")
@@ -82,8 +88,19 @@ class Server(object):
         return(subprocess.call(["tmux","has-session","-t",self.tmuxname],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
-    def stop(self):
-        print("Not implemented")
+    def stop(self,wait=30):
+        """
+        wait: seconds to wait until the server is stopped before timing out
+        """
+        self.send("") # newline
+        self.send("save-all")
+        time.sleep(3)
+        self.send("stop")
+        for i in range(0,wait):
+            if self.status() == 0:
+                return(0)
+            time.sleep(1)
+        return(1)
 
     def update(self):
         print("Not implemented")
