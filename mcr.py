@@ -12,7 +12,7 @@ from libmcr import *
 parser = argparse.ArgumentParser(
         prog="mcr", # statically set the program name shown in usage, etc
         usage="usage: mcr [args] command [data]",
-        formatter_class=argparse.RawDescriptionHelpFormatter, # don't touch my line breaks
+        formatter_class=argparse.RawDescriptionHelpFormatter, # MY line breaks
         description="Minecraft Runner (mcr), Python Edition",
         epilog='''command options:
   attach | a        attach to console (Ctrl+b d to disconnect)
@@ -81,6 +81,7 @@ if args.command == "mkconfig":
 ;backupremotemethod=rsync-ssh
 ;; update: one up-to-date backup. collect: old backups plus this one.
 ;backupremotetype=update
+;; address to do remote backups to
 ;backupremoteaddress=minecraft@other-host.de:/home/minecraft/minecraft-backups/
 ''')
         print("A sample config file has been appended to")
