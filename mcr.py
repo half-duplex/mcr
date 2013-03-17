@@ -12,7 +12,7 @@ from libmcr import *
 parser = argparse.ArgumentParser(
         prog="mcr", # statically set the program name shown in usage, etc
         usage="usage: mcr [args] command [data]",
-        formatter_class=argparse.RawDescriptionHelpFormatter, # MY line breaks
+        formatter_class=argparse.RawDescriptionHelpFormatter, # keep doc format
         description="Minecraft Runner (mcr), Python Edition",
         epilog='''command options:
   attach | a        attach to console (Ctrl+b d to disconnect)
@@ -64,7 +64,8 @@ logging.basicConfig(level=loglevel)
 logging.info("args:"+str(vars(args))) # needs logging set up already
 
 if args.command == "mkconfig":
-    with open(os.path.expanduser("~"+args.configuser)+"/.config/mcr","a") as cfgr:
+    with open(os.path.expanduser("~"+args.configuser)+"/.config/mcr","a") \
+            as cfgr:
         cfgr.write('''
 ;; Sample config
 ;; server instance name
@@ -82,7 +83,7 @@ if args.command == "mkconfig":
 ;; update: one up-to-date backup. collect: old backups plus this one.
 ;backupremotetype=update
 ;; address to do remote backups to
-;backupremoteaddress=minecraft@other-host.de:/home/minecraft/minecraft-backups/
+;backupremoteaddress=me@other-host.de:/home/me/minecraft-backups/
 ''')
         print("A sample config file has been appended to")
         print("   ",os.path.expanduser("~"+args.configuser)+"/.config/mcr")

@@ -15,7 +15,8 @@ libmcr_version = "0.1-dev"
 logger = logging.getLogger("libmcr")
 # At the moment these cause double logging
 #ch = logging.StreamHandler()
-#formatter = logging.Formatter('%(asctime)s %(name)s [%(levelname)s] %(message)s')
+#formatter = logging.Formatter(
+#    '%(asctime)s %(name)s [%(levelname)s] %(message)s')
 #ch.setFormatter(formatter)
 #logger.addHandler(ch)
 
@@ -52,7 +53,8 @@ class Server(object):
             return
         config = allconfigs[name]
         logger.info("loaded cfg:"+str(config))
-        self.tmuxname = config["tmuxname"] if "tmuxname" in config and config["tmuxname"] else "mc"
+        self.tmuxname = config["tmuxname"] if "tmuxname" \
+            in config and config["tmuxname"] else "mc"
 
     def attach(self):
         # argv[0] is called binary name
