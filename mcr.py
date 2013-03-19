@@ -107,7 +107,14 @@ elif args.command == "backup":
     if ret:
         logging.error("error")
     exit(ret)
-
+elif args.command == "kill":
+    pass
+elif args.command == "restart":
+    pass
+elif args.command == "send":
+    exit(server.send(args.data)
+elif args.command == "start":
+    pass
 elif args.command == "status":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
@@ -117,6 +124,10 @@ elif args.command == "status":
     else:
         print("running")
     exit(ret)
+elif args.command == "stop":
+    pass
+elif args.command == "update":
+    pass
         
 
 print("Unrecognized command \"",args.command,"\"",sep="")

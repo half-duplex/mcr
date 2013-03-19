@@ -48,10 +48,10 @@ class Server(object):
         allconfigs = mycfgp.as_dict()
         if len(allconfigs)<1:
             logger.error("No or empty config file, see \"mcr mkconfig\"")
-            return
+            return(1)
         if not name in allconfigs:
             logger.error("No server section found for \"",name,"\"")
-            return
+            return(2)
         config = allconfigs[name]
         logger.info("loaded cfg:"+str(config))
         self.tmuxname = config["tmuxname"] if "tmuxname" \
@@ -60,7 +60,7 @@ class Server(object):
     def attach(self):
         if self.status():
             logger.error("server not running, can't attach")
-            return
+            return(1)
         # argv[0] is called binary name. Need os.execlp so tmux _replaces_ py.
         return(os.execlp("tmux","tmux","a","-t",self.tmuxname))
 
@@ -81,7 +81,9 @@ class Server(object):
     def send(self,data):
         if self.status():
             logger.error("server not running, can't send")
-            return
+            return(1)
+        if type(data)!=type(str):
+            data=" ".join(data)
         return(subprocess.call(["tmux","send-keys","-t",self.tmuxname+":0.0",data+" C-m"],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
