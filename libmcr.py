@@ -197,8 +197,9 @@ class Server(object):
             time.sleep(1)
         return(self.ERROR_GENERAL)
 
-    def update(self):
-        print("Not implemented")
+    def update(self,plugin="all"):
+        logger.critical("Not implemented")
+        return(self.ERROR_NOT_IMPLEMENTED)
 
 
 def getservers(user=""):
