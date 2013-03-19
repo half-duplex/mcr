@@ -78,8 +78,12 @@ class Server(object):
         self.start()
         return(self.status())
 
-    def send(self):
-        print("Not implemented")
+    def send(self,data):
+        if self.status():
+            logger.error("server not running, can't send")
+            return
+        return(subprocess.call(["tmux","send-keys","-t",self.tmuxname+":0.0",data+" C-m"],
+            stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
     def start(self):
         print("Not implemented")
