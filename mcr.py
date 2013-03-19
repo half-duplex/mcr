@@ -67,7 +67,9 @@ if args.command == "mkconfig":
     with open(os.path.expanduser("~"+args.configuser)+"/.config/mcr","a") \
             as cfgr:
         cfgr.write('''
+        
 ;; Sample config
+;; Note: ALL directories MUST be absolute paths (no ~ or ./)
 ;; server instance name
 ;[default]
 ;; the directory to run the server from (and to back up)
@@ -78,11 +80,10 @@ if args.command == "mkconfig":
 ;jar=craftbukkit.jar -log-strip-color true
 ;; where to back up to for local. will create backupdir/20130223030000/
 ;backupdir=/home/minecraft/minecraft-backups/
-;; supported: scp, rsync-ssh
-;backupremotemethod=rsync-ssh
+;; REMOTE BACKUPS: rsync required on local and remote. MAY BE INTERACTIVE!
 ;; update: one up-to-date backup. collect: old backups plus this one.
 ;backupremotetype=update
-;; address to do remote backups to
+;; address to do rsync backups to, user@host:/dir
 ;backupremoteaddress=me@other-host.de:/home/me/minecraft-backups/
 ''')
         print("A sample config file has been appended to")
@@ -91,7 +92,6 @@ if args.command == "mkconfig":
 
 server = Server(args.configname,args.configuser,args.configfile)
 
-# ["attach","backup","kill","restart","send","start","status","stop","update"]
 if args.command == "attach" or args.command == "a":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
@@ -99,6 +99,7 @@ if args.command == "attach" or args.command == "a":
     if ret:
         logging.warning("error, is the server running?")
     exit(ret)
+
 elif args.command == "backup":
     if "remote" in args.data:
         ret = server.backup(remote=True)
@@ -107,14 +108,28 @@ elif args.command == "backup":
     if ret:
         logging.error("error")
     exit(ret)
+
 elif args.command == "kill":
-    pass
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    exit(server.kill())
+
 elif args.command == "restart":
-    pass
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    exit(server.restart())
+
 elif args.command == "send":
-    exit(server.send(args.data)
+    if len(args.data)==0:
+        logging.info("what to send?")
+        exit(1)
+    exit(server.send(args.data))
+
 elif args.command == "start":
-    pass
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    exit(server.start())
+
 elif args.command == "status":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
@@ -124,10 +139,14 @@ elif args.command == "status":
     else:
         print("running")
     exit(ret)
+
 elif args.command == "stop":
-    pass
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    exit(server.stop())
+
 elif args.command == "update":
-    pass
+    exit(server.update(args.data))
         
 
 print("Unrecognized command \"",args.command,"\"",sep="")
