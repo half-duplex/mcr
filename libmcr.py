@@ -26,7 +26,7 @@ logger = logging.getLogger("libmcr")
 
 class Server(object):
     """ A minecraft server """
-    
+
     (
         ERROR_NONE,
         ERROR_GENERAL,
@@ -34,6 +34,8 @@ class Server(object):
         ERROR_NOT_RUNNING,
         ERROR_NOT_IMPLEMENTED
         ) = (0,1,2,3,99)
+
+    javacmd="java"
 
     def __init__(self,name=None,user=None,configfile=None):
         name = name if name and type(name)==type(str) else "default"
@@ -108,7 +110,7 @@ class Server(object):
             self.send("") # empty line
             self.send("broadcast [Backing up]")
             self.send("save-off")
-            sleep(0.1)
+            sleep(0.1) # needed?
             self.send("save-all")
         logger.debug("backing up to "+self.backupdir+nows)
         ret=0 # return status
@@ -127,17 +129,22 @@ class Server(object):
             self.send("save-on")
             if not ret: self.send("broadcast [Backup complete]")
             else: self.send("broadcast [Backup failed, notify staff]")
-        # todo: remote
+        # TODO: remote
         return(ret)
 
-    def kill(self):
+    def kill(self): # TODO: make work w/ pid etc
         logger.warning("kill sometimes only kills the tmux session, not java!")
         return(subprocess.call(["tmux","kill-session","-t",self.tmuxname],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
-    def restart(self): # blocks until stopped!
+    def restart(self,wait=60,message=None,delay=60): # blocks until stopped!
         if self.status() == 0:
-            self.stop()
+            if not message: message="Restarting server in "+delay+" seconds"
+            if self.stop(wait=60,
+                    message="Restarting server in "+delay+" seconds",
+                    delay=delay) != 0:
+                logger.error("couldn't stop server, restart failed")
+                return(self.ERROR_GENERAL)
         else:
             logger.warning("server wasn't running, starting anyway")
         self.start()
@@ -154,7 +161,17 @@ class Server(object):
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
     def start(self):
-        print("Not implemented")
+        if self.status() == 0:
+            logger.error("server already running")
+            return(self.ERROR_GENERAL)
+        # TODO: trap "" 2 20 ; exec javastuff
+        command=self.javacmd+" -jar "+self.directory+"/"+self.jar
+        logger.debug("starting: "+command)
+        subprocess.call(
+            ["tmux","new-session","-ds",self.tmuxname,"exec "+command],
+            stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'),
+            env={"HOME": os.path.expanduser("~"+self.user)}) # broken
+        return(self.status())
 
     def status(self): # 0=running, 1=stopped
         return(subprocess.call(["tmux","has-session","-t",self.tmuxname],
