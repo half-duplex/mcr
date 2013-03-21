@@ -38,8 +38,8 @@ class Server(object):
     javacmd="java"
 
     def __init__(self,name=None,user=None,configfile=None):
-        name = name if name and type(name)==type(str) else "default"
-        user = user if user and type(user)==type(str) else ""
+        if not name or not isinstance(name, str): name = "default"
+        if not user or not isinstance(user, str): user = ""
         if configfile: # specified: check existence
             if not os.path.exists(configfile):
                 configfile = os.getcwd()+configfile
@@ -65,7 +65,7 @@ class Server(object):
             logger.error("No server section found for \"",name,"\"")
             return(self.ERROR_CONFIG)
         config = allconfigs[name]
-        logger.info("loaded cfg:"+str(config))
+        logger.info("loaded cfg ("+name+"):"+str(config))
         
         if "dir" in config and os.path.exists(config["dir"]):
             self.directory = config["dir"]
@@ -79,9 +79,12 @@ class Server(object):
         else:
             logger.error("required option \"jar\" not found in config")
             return(self.ERROR_CONFIG)
-        self.backupdir = config["backupdir"]
-        self.backupremotetype = config["backupremotetype"]
-        self.backupremoteaddress = config["backupremoteaddress"]
+        if "backupdir" in config:
+            self.backupdir = config["backupdir"]
+        if "backupremotetype" in config:
+            self.backupremotetype = config["backupremotetype"]
+        if "backupremoteaddress" in config:
+            self.backupremoteaddress = config["backupremoteaddress"]
 
     def attach(self):
         if self.status():
@@ -201,8 +204,12 @@ class Server(object):
         return(self.ERROR_GENERAL)
 
     def update(self,plugin="all"):
-        logger.critical("Not implemented")
-        return(self.ERROR_NOT_IMPLEMENTED)
+        if not os.path.exists(self.directory+"/plugins/"):
+            logger.error("plugin directory does not exist")
+            return(self.ERROR_GENERAL)
+        pjarlist=os.listdir(self.directory+"/plugins/")
+        for pjar in pjarlist:
+            print(pjar[-4:])
 
 
 def getservers(user=""):
