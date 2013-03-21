@@ -154,10 +154,10 @@ class Server(object):
         if self.status():
             logger.error("server not running, can't send")
             return(self.ERROR_NOT_RUNNING)
-        if type(data)!=type(str):
+        if not type(data) is str:
             data=" ".join(data)
-        logger.debug("sending to",self.tmuxname,"data:",data)
-        return(subprocess.call(["tmux","send-keys","-t",self.tmuxname+":0.0",data+" C-m"],
+        logger.debug("sending to "+self.tmuxname+" data: "+data)
+        return(subprocess.call(["tmux","send-keys","-t",self.tmuxname+":0.0",data,"C-m"],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
     def start(self):
@@ -165,24 +165,27 @@ class Server(object):
             logger.error("server already running")
             return(self.ERROR_GENERAL)
         # TODO: trap "" 2 20 ; exec javastuff
-        command=self.javacmd+" -jar "+self.directory+"/"+self.jar
-        logger.debug("starting: "+command)
+        command = self.javacmd+" -jar "+self.directory+"/"+self.jar
+        command = "env -i HOME=" + os.path.expanduser("~"+self.user) + \
+            " PWD=" + self.directory + " " + command
+        logger.debug("command: "+command)
         subprocess.call(
             ["tmux","new-session","-ds",self.tmuxname,"exec "+command],
-            stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'),
-            env={"HOME": os.path.expanduser("~"+self.user)}) # broken
+            stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'))
         return(self.status())
 
     def status(self): # 0=running, 1=stopped
         return(subprocess.call(["tmux","has-session","-t",self.tmuxname],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
-    def stop(self,wait=30,message="Server stopping in 30 seconds...",delay=30):
+    def stop(self,wait=30,message=None,delay=10):
         """
         wait: seconds to wait until the server is stopped before timing out
         message: message to send to users
         """
         self.send("") # newline
+        if message == None:
+            message = "Server stopping in "+delay+" seconds..."
         if len(message)>0:
             self.send("broadcast "+message)
         time.sleep(delay)
