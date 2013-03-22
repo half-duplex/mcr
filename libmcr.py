@@ -168,13 +168,14 @@ class Server(object):
             logger.error("server already running")
             return(self.ERROR_GENERAL)
         # TODO: trap "" 2 20 ; exec javastuff
-        command = self.javacmd+" -jar "+self.directory+"/"+self.jar
-        command = "env -i HOME=" + os.path.expanduser("~"+self.user) + \
-            " PWD=" + self.directory + " " + command
+        command = self.javacmd + " -jar " + self.jar #includes jar args
         logger.debug("command: "+command)
         subprocess.call(
-            ["tmux","new-session","-ds",self.tmuxname,"exec "+command],
+            ["tmux","new-session","-ds",self.tmuxname, "exec env -i sh"],
             stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'))
+        self.send("export HOME=" + os.path.expanduser("~"+self.user))
+        self.send("cd " + self.directory + " ")
+        self.send("exec "+command)
         return(self.status())
 
     def status(self): # 0=running, 1=stopped
@@ -186,9 +187,12 @@ class Server(object):
         wait: seconds to wait until the server is stopped before timing out
         message: message to send to users
         """
+        if self.status()==1:
+            logger.error("server already stopped")
+            return(self.ERROR_GENERAL)
         self.send("") # newline
         if message == None:
-            message = "Server stopping in "+delay+" seconds..."
+            message = "Server stopping in " + str(delay) + " seconds..."
         if len(message)>0:
             self.send("broadcast "+message)
         time.sleep(delay)
