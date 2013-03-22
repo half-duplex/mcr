@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, # keep doc format
         description="Minecraft Runner (mcr), Python Edition",
         epilog='''command options:
-  attach | a        attach to console (Ctrl+b d to disconnect)
+  attach | a        attach to console (Ctrl+b d to disconnect) sa = start first
   backup [remote]   back up the server [remote: to the server in cfg]
   kill              terminate the server - MAY CAUSE MAP OR DB CORRUPTION
   mkconfig          append a sample config file to ~/.config/mcr/sample
@@ -92,15 +92,20 @@ if args.command == "mkconfig":
 
 server = Server(args.configname,args.configuser,args.configfile)
 
-if args.command == "attach" or args.command == "a":
+# above attach for cmd="sa"
+if args.command == "start" or args.command == "sa":
+    if len(args.data)>0:
+        logging.info("discarding post-command data: "+" ".join(args.data))
+    ret=server.start()
+    if args.command != "sa": exit(ret)
+
+if args.command == "attach" or args.command == "a" or args.command == "sa":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
     ret = server.attach()
-    if ret:
-        logging.warning("error, is the server running?")
     exit(ret)
 
-elif args.command == "backup":
+if args.command == "backup":
     if "remote" in args.data:
         ret = server.backup(remote=True)
     else:
@@ -109,28 +114,23 @@ elif args.command == "backup":
         logging.error("error")
     exit(ret)
 
-elif args.command == "kill":
+if args.command == "kill":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
     exit(server.kill())
 
-elif args.command == "restart":
+if args.command == "restart":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
     exit(server.restart())
 
-elif args.command == "send":
+if args.command == "send":
     if len(args.data)==0:
         logging.info("what to send?")
         exit(1)
     exit(server.send(args.data))
 
-elif args.command == "start":
-    if len(args.data)>0:
-        logging.info("discarding post-command data: "+" ".join(args.data))
-    exit(server.start())
-
-elif args.command == "status":
+if args.command == "status":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
     ret = server.status()
@@ -140,12 +140,12 @@ elif args.command == "status":
         print("running")
     exit(ret)
 
-elif args.command == "stop":
+if args.command == "stop":
     if len(args.data)>0:
         logging.info("discarding post-command data: "+" ".join(args.data))
     exit(server.stop())
 
-elif args.command == "update":
+if args.command == "update":
     exit(server.update(args.data))
         
 

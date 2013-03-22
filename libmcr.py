@@ -171,11 +171,10 @@ class Server(object):
         command = self.javacmd + " -jar " + self.jar #includes jar args
         logger.debug("command: "+command)
         subprocess.call(
-            ["tmux","new-session","-ds",self.tmuxname, "exec env -i sh"],
+            ["tmux","new-session","-ds",self.tmuxname, "sh"],
             stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'))
-        self.send("export HOME=" + os.path.expanduser("~"+self.user))
-        self.send("cd " + self.directory + " ")
-        self.send("exec "+command)
+        time.sleep(0.1) # prettier to not print twice waiting for sh start
+        self.send("cd " + self.directory + " ; exec "+command)
         return(self.status())
 
     def status(self): # 0=running, 1=stopped
