@@ -206,13 +206,23 @@ class Server(object):
             time.sleep(1)
         return(self.ERROR_GENERAL)
 
-    def update(self,plugin="all"):
+    def update(self,plugins=None):
+        if not plugins: plugins = ["all"]
+        logger.debug("updating plugins: "+str(plugins))
         if not os.path.exists(self.directory+"/plugins/"):
             logger.error("plugin directory does not exist")
             return(self.ERROR_GENERAL)
         pjarlist=os.listdir(self.directory+"/plugins/")
         for pjar in pjarlist:
-            print(pjar[-4:])
+            if pjar[-4:]==".jar":
+                pset=pjar[:-4].split("_")
+                pname=str(pset[0])
+                if "all" in plugins or pname in plugins:
+                    logger.debug("checking "+pset[0]+" "+pset[1])
+                    # update
+                    return(self.ERROR_NONE)
+        # not already installed
+        # update
 
 
 def getservers(user=""):
