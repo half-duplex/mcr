@@ -25,7 +25,7 @@ logger = logging.getLogger("libmcr")
 
 
 class Server(object):
-    """ A minecraft server """
+    """ An instance of a minecraft server """
 
     (
         ERROR_NONE,
@@ -87,6 +87,7 @@ class Server(object):
             self.backupremoteaddress = config["backupremoteaddress"]
 
     def attach(self):
+        """ Attach to the server """
         if self.status():
             logger.error("server not running, can't attach")
             return(self.ERROR_NOT_RUNNING)
@@ -94,7 +95,7 @@ class Server(object):
         return(os.execlp("tmux","tmux","a","-t",self.tmuxname))
 
     def backup(self,remote=False):
-        """
+        """ Back up the server
         remote: copy to the configured remote location after backup
         
         note: omits *.log
@@ -136,6 +137,7 @@ class Server(object):
         return(ret)
 
     def kill(self): # TODO: make work w/ pid etc
+        """ Kill the server ('s tmux session) """
         logger.warning("kill sometimes only kills the tmux session, not java!")
         return(subprocess.call(["tmux","kill-session","-t",self.tmuxname],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
@@ -177,7 +179,10 @@ class Server(object):
         self.send("cd " + self.directory + " ; exec "+command)
         return(self.status())
 
-    def status(self): # 0=running, 1=stopped
+    def status(self):
+        """ Check the server's (tmux session's) status
+        returns 0 for running, 1 for stopped
+        """
         return(subprocess.call(["tmux","has-session","-t",self.tmuxname],
             stdout=open(os.devnull, 'w'),stderr=open(os.devnull, 'w')))
 
