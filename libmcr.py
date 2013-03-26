@@ -169,14 +169,14 @@ class Server(object):
         if self.status() == 0:
             logger.error("server already running")
             return(self.ERROR_GENERAL)
-        # TODO: trap "" 2 20 ; exec javastuff
-        command = self.javacmd + " -jar " + self.jar #includes jar args
+        # TODO: verify trap
+        command = "trap \"\" 2 20 ; exec self.javacmd + " -jar " + self.jar #includes jar args
         logger.debug("command: "+command)
         subprocess.call(
             ["tmux","new-session","-ds",self.tmuxname, "sh"],
             stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'))
         time.sleep(0.1) # prettier to not print twice waiting for sh start
-        self.send("cd " + self.directory + " ; exec "+command)
+        self.send("cd "+self.directory+" ; "+command)
         return(self.status())
 
     def status(self):
