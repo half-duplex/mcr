@@ -66,7 +66,7 @@ class Server(object):
             return(self.ERROR_CONFIG)
         config = allconfigs[name]
         logger.info("loaded cfg ("+name+"):"+str(config))
-        
+
         if "dir" in config and os.path.exists(config["dir"]):
             self.directory = config["dir"]
         else:
@@ -97,7 +97,7 @@ class Server(object):
     def backup(self,remote=False):
         """ Back up the server
         remote: copy to the configured remote location after backup
-        
+
         note: omits *.log
         """
         if remote:
@@ -127,7 +127,7 @@ class Server(object):
             except:
                 logger.error("backup copy failed")
                 ret=self.ERROR_GENERAL
-        
+
         if status==0: # post-notify and cleanup - MUST BE RUN!
             self.send("") # empty line
             self.send("save-on")
@@ -170,7 +170,7 @@ class Server(object):
             logger.error("server already running")
             return(self.ERROR_GENERAL)
         # TODO: verify trap
-        command = "trap \"\" 2 20 ; exec self.javacmd + " -jar " + self.jar #includes jar args
+        command = "trap \"\" 2 20 ; exec " + self.javacmd + " -jar " + self.jar #includes jar args
         logger.debug("command: "+command)
         subprocess.call(
             ["tmux","new-session","-ds",self.tmuxname, "sh"],

@@ -60,14 +60,14 @@ elif args.verbose == 1:
 elif args.verbose >= 2:
     loglevel = logging.DEBUG
 logging.basicConfig(level=loglevel)
-    
+
 logging.info("args:"+str(vars(args))) # needs logging set up already
 
 if args.command == "mkconfig":
     with open(os.path.expanduser("~"+args.configuser)+"/.config/mcr","a") \
             as cfgr:
         cfgr.write('''
-        
+
 ;; Sample config
 ;; Note: ALL directories MUST be absolute paths (no ~ or ./)
 ;; server instance name
@@ -147,7 +147,7 @@ if args.command == "stop":
 
 if args.command == "update":
     exit(server.update(args.data))
-        
+
 
 print("Unrecognized command \"",args.command,"\"",sep="")
 parser.print_help()
