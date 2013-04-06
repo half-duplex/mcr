@@ -6,9 +6,11 @@ Copyright 2013 Trevor Bergeron & Sean Buckley, all rights reserved
 
 import configparser
 from datetime import datetime
+import json # parsing bukget api comm
 import logging
 import os
-from shutil import copytree, ignore_patterns
+import requests
+from shutil import copytree, ignore_patterns # backups
 import subprocess
 import sys
 import time
@@ -217,17 +219,41 @@ class Server(object):
         if not os.path.exists(self.directory+"/plugins/"):
             logger.error("plugin directory does not exist")
             return(self.ERROR_GENERAL)
-        pjarlist=os.listdir(self.directory+"/plugins/")
+
+        pjarlist = os.listdir(self.directory+"/plugins/")
+        plugindict = {}
         for pjar in pjarlist:
-            if pjar[-4:]==".jar":
-                pset=pjar[:-4].split("_")
-                pname=str(pset[0])
-                if "all" in plugins or pname in plugins:
-                    logger.debug("checking "+pset[0]+" "+pset[1])
-                    # update
-                    return(self.ERROR_NONE)
-        # not already installed
-        # update
+            if pjar[-4:] == ".jar" or pjar[-4:] == ".dis":
+                pjarinfo = pjar[:-4].split("_")
+                if not pjarinfo[0] == "x": #x_ means don't manage
+                    # a_b_c_1.2.3.jar a_b_c key and 1.2.3 val
+                    plugindict["_".join(pjarinfo[:-1])] = pjarinfo[-1:]
+                else:
+                    logger.info("ignoring "+pjar)
+        logger.debug("installed plugins: "+str(plugindict))
+
+        if "all" in plugins:
+            for plugin in plugindict:
+                    logger.debug("checking for update to "+str(plugin))
+                    resp = requests.get("http://api.bukget.org/3/plugins/bukkit/"+plugin+"/latest/").json()
+                    if plugindict[plugin] != resp["versions"][0]["version"]:
+                        logger.info("updating "+plugin)
+                        if resp["versions"][0]["filename"][-4:] == ".jar":
+                            pass
+                            # download
+                            # rm old
+                            # copy new
+                        elif resp["versions"][0]["filename"][-4:] == ".zip":
+                            pass
+                            # download
+                            # unzip
+                            # rm old jars
+                            # find+copy new jars
+                        else:
+                            logger.error("download for "+plugin+" isn't jar or zip!")
+                    else:
+                        logger.debug("no update for "+plugin)
+
 
 
 def getservers(user=""):
