@@ -254,8 +254,6 @@ class Server(object):
                     else:
                         logger.debug("no update for "+plugin)
 
-
-
 def getservers(user=""):
     """ Create a dictionary of all servers for a(=this) user """
     servers = {}
