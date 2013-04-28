@@ -94,11 +94,11 @@ class client_job(asyncore.dispatcher_with_send):
         data = self.recv(512)
         if data:
             self.read_in += data.decode("utf-8")
-            read_find = self.read_in.find('\n')
+            read_find = self.read_in.find(dc)
             while read_find > -1:
                 self.process_line(self.read_in[:read_find])
                 self.read_in = self.read_in[read_find+1:]
-                read_find = self.read_in.find('\n')
+                read_find = self.read_in.find(dc)
     def process_line(self,gotline):
         global servers
         cmd = gotline.split(dc)
