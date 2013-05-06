@@ -42,11 +42,7 @@ class server_job(asyncore.dispatcher_with_send):
         new_cmd.append(socket_path)
         new_cmd.append('java')
         new_cmd.append('-Xmx2G')
-        new_cmd.append('-XX:-UsePerfData')
-        new_cmd.append('-XX:+UseConcMarkSweepGC')
-        new_cmd.append('-XX:+UseParNewGC')
-        new_cmd.append('-XX:MinHeapFreeRatio=5')
-        new_cmd.append('-XX:MaxHeapFreeRatio=10')
+        new_cmd.append('-XX:+DisableExplicitGC')
         new_cmd.append('-XX:+AggressiveOpts')
         new_cmd.append('-jar')
         new_cmd.append('server.jar')
@@ -140,6 +136,35 @@ class client_job(asyncore.dispatcher_with_send):
                 for i in servers:
                     if i.server_name == cmd[1]:
                         i.send((chr(0)+chr(1)+chr(3)+(chr(0)*7)).encode("utf-8"))
+        if len(cmd) == 3:
+            if cmd[0] == "get_lines":
+                try:
+                    for i in servers:
+                        if i.server_name == cmd[1]:
+                            return_list = 'log' + dc + cmd[1] + dc + 'ok'
+                            for j in reversed(range(min(len(i.log),int(cmd[2])))):
+                                return_list += dc + i.log[j]
+                            self.send_line(return_list)
+                            return
+                except:
+                    self.send_line('log' + dc + cmd[1] + dc + 'error')
+            if cmd[0] == "get_after":
+                try:
+                    for i in servers:
+                        if i.server_name == cmd[1]:
+                            return_list_tmp = []
+                            for j in reversed(i.log):
+                                if int(j.split(dc)[0]) < int(cmd[2]):
+                                    return_list_tmp.append(i.log[j])
+                                else:
+                                    break
+                            return_list = 'log' + dc + cmd[1] + dc + 'ok'
+                            for j in reversed(return_list_tmp):
+                                return_list += dc + j
+                            self.send_line(return_list)
+                            return
+                except:
+                    self.send_line('log' + dc + cmd[1] + dc + 'error')
     def send_line(self,sendline):
         self.send((sendline + ec).encode("utf-8"))
 
