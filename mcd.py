@@ -154,7 +154,7 @@ class client_job(asyncore.dispatcher_with_send):
                         if i.server_name == cmd[1]:
                             return_list_tmp = []
                             for j in reversed(i.log):
-                                if int(j.split(dc)[0]) < int(cmd[2]):
+                                if int(j.split(dc)[0]) > int(cmd[2]):
                                     return_list_tmp.append(i.log[j])
                                 else:
                                     break
