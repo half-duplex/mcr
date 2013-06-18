@@ -214,6 +214,8 @@ class Server(object):
         return(self.ERROR_GENERAL)
 
     def update(self,plugins=None):
+        import urllib.request, shutil
+
         if not plugins: plugins = ["all"]
         logger.debug("updating plugins: "+str(plugins))
         if not os.path.exists(self.directory+"/plugins/"):
@@ -236,16 +238,19 @@ class Server(object):
             for plugin in plugindict:
                     logger.debug("checking for update to "+str(plugin))
                     resp = requests.get("http://api.bukget.org/3/plugins/bukkit/"+plugin+"/latest/").json()
-                    if plugindict[plugin] != resp["versions"][0]["version"]:
+                    if plugindict[plugin][0] != resp["versions"][0]["version"]:
                         logger.info("updating "+plugin)
+                        if len(resp["versions"][0]["hard_dependencies"]):
+                            logger.info("hard_dependencies for "+plugin+": "+str(resp["versions"][0]["hard_dependencies"]))
+                        # TODO: install ["hard_dependencies"] automatically
                         if resp["versions"][0]["filename"][-4:] == ".jar":
-                            pass
-                            # download
-                            # rm old
-                            # copy new
+                            logger.debug("downloading "+resp["versions"][0]["download"])
+                            urllib.request.urlretrieve(resp["versions"][0]["download"], "/tmp/"+plugin+".jar")
+                            logger.debug("installing as "+self.directory+"plugins/"+plugin+"_"+resp["versions"][0]["version"]+".jar")
+                            shutil.move("/tmp/"+plugin+".jar", self.directory+"plugins/"+plugin+"_"+resp["versions"][0]["version"]+".jar")
+                            os.remove(self.directory+"plugins/"+plugin+"_"+plugindict[plugin][0]+".jar")
                         elif resp["versions"][0]["filename"][-4:] == ".zip":
-                            pass
-                            # download
+                            urllib.request.urlretrieve(resp["versions"][0]["download"], "/tmp/"+plugin+".zip")
                             # unzip
                             # rm old jars
                             # find+copy new jars
